@@ -31,7 +31,7 @@
     },
     "autoload": {
         "psr-4": {
-            "servd\\AssetStorage\\": "src/"
+            "servd\\DallEFieldtype\\": "src/"
         }
     },
     "extra": {

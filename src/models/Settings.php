@@ -1,6 +1,6 @@
 <?php
 
-namespace servd\DallE\models;
+namespace servd\DallEFieldtype\models;
 
 use Craft;
 use craft\base\Model;

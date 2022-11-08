@@ -1,6 +1,6 @@
 <?php
 
-namespace servd\DallE;
+namespace servd\DallEFieldtype;
 
 use Craft;
 use craft\base\Model;
@@ -23,9 +23,9 @@ class Plugin extends BasePlugin
 
         // Set the controllerNamespace based on whether this is a console or web request
         if (Craft::$app->getRequest()->getIsConsoleRequest()) {
-            $this->controllerNamespace = 'servd\\DallE\\console\\controllers';
+            $this->controllerNamespace = 'servd\\DallEFieldtype\\console\\controllers';
         } else {
-            $this->controllerNamespace = 'servd\\DallE\\controllers';
+            $this->controllerNamespace = 'servd\\DallEFieldtype\\controllers';
         }
 
         Event::on(
@@ -44,7 +44,7 @@ class Plugin extends BasePlugin
 
     protected function createSettingsModel() : ?Model
     {
-        return new \servd\DallE\models\Settings();
+        return new \servd\DallEFieldtype\models\Settings();
     }
 
     protected function settingsHtml() : ?string
