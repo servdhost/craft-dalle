@@ -1,0 +1,53 @@
+{
+    "name": "servd/craft-dalle",
+    "description": "A field type to integrate with the Dall-E Image Generation API",
+    "version": "1.0.0",
+    "type": "craft-plugin",
+    "keywords": [
+        "cms",
+        "craftcms",
+        "servd",
+        "yii2",
+        "openai",
+        "dall-e"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Servd",
+            "homepage": "https://servd.host/"
+        }
+    ],
+    "support": {
+        "email": "hello@servd.host",
+        "issues": "https://github.com/servdhost/craft-dalle/issues",
+        "source": "https://github.com/servdhost/craft-dalle",
+        "docs": "https://github.com/servdhost/craft-dalle"
+    },
+    "require": {
+        "php": "^8.0.2",
+        "craftcms/cms": "^4.0.0-beta.2",
+        "craftcms/flysystem": "^1.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "servd\\AssetStorage\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Dall-E Fieldtype",
+        "handle": "craft-dalle",
+        "documentationUrl": "https://github.com/servdhost/craft-dalle"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
+    }
+}
