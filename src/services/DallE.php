@@ -32,7 +32,7 @@ class DallE extends Component
         $guzzle = Craft::createGuzzleClient();
         $r = $guzzle->post('https://api.openai.com/v1/images/generations', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $settings->apiKey
+                'Authorization' => 'Bearer ' . $settings->getApiKey()
             ],
             'json' => [
                 "prompt" => $fullPrompt,
@@ -67,7 +67,7 @@ class DallE extends Component
         $guzzle = Craft::createGuzzleClient();
         $r = $guzzle->post('https://api.openai.com/v1/images/variations', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $settings->apiKey
+                'Authorization' => 'Bearer ' . $settings->getApiKey()
             ],
             'multipart' => [
                 ["name" => "image", "contents" => $body],
@@ -132,7 +132,7 @@ class DallE extends Component
 
         $leftUrls = $guzzle->post('https://api.openai.com/v1/images/edits', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $settings->apiKey
+                'Authorization' => 'Bearer ' . $settings->getApiKey()
             ],
             'multipart' => [
                 ["name" => "image", "contents" => fopen($leftCanvasPath, 'r')],
@@ -146,7 +146,7 @@ class DallE extends Component
 
         $rightUrls = $guzzle->post('https://api.openai.com/v1/images/edits', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $settings->apiKey
+                'Authorization' => 'Bearer ' . $settings->getApiKey()
             ],
             'multipart' => [
                 ["name" => "image", "contents" => fopen($rightCanvasPath, 'r')],

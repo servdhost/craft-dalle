@@ -16,11 +16,16 @@ class DallEFieldController extends Controller
     public function actionGenerateImages()
     {
         $this->requireCpRequest();
+        $settings = Plugin::$plugin->getSettings();
+        if (empty($settings->getApiKey())) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => "No Open AI API key has been set in the plugin settings.",
+            ])->setStatusCode(400);
+        }
+
         /** @var Request $req */
         $req = Craft::$app->getRequest();
-
-        $settings = Plugin::$plugin->getSettings();
-
         $prompt = $req->getQueryParam('prompt');
         $fieldId = $req->getQueryParam('fieldId');
         $count = intval($settings->count);
@@ -60,11 +65,16 @@ class DallEFieldController extends Controller
     public function actionGenerateVariants()
     {
         $this->requireCpRequest();
+        $settings = Plugin::$plugin->getSettings();
+        if (empty($settings->getApiKey())) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => "No Open AI API key has been set in the plugin settings.",
+            ])->setStatusCode(400);
+        }
+
         /** @var Request $req */
         $req = Craft::$app->getRequest();
-
-        $settings = Plugin::$plugin->getSettings();
-
         $imageUrl = $req->getQueryParam('imageUrl');
         $count = intval($settings->count);
 
@@ -103,11 +113,16 @@ class DallEFieldController extends Controller
     public function actionExtendHorizontally()
     {
         $this->requireCpRequest();
+        $settings = Plugin::$plugin->getSettings();
+        if (empty($settings->getApiKey())) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => "No Open AI API key has been set in the plugin settings.",
+            ])->setStatusCode(400);
+        }
+
         /** @var Request $req */
         $req = Craft::$app->getRequest();
-
-        $settings = Plugin::$plugin->getSettings();
-
         $imageUrl = $req->getQueryParam('imageUrl');
         $prompt = $req->getQueryParam('prompt');
         $fieldId = $req->getQueryParam('fieldId');

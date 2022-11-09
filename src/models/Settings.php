@@ -4,6 +4,7 @@ namespace servd\DallEFieldtype\models;
 
 use Craft;
 use craft\base\Model;
+use craft\helpers\App;
 
 class Settings extends Model
 {
@@ -17,5 +18,13 @@ class Settings extends Model
             ['count', 'integer', 'min' => 1, 'max' => 8],
         ];
         return $rules;
+    }
+
+    public function getApiKey()
+    {
+        if (!empty($this->apiKey)) {
+            return App::parseEnv($this->apiKey);
+        }
+        return '';
     }
 }
