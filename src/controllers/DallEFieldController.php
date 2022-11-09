@@ -5,6 +5,7 @@ namespace servd\DallEFieldtype\controllers;
 use Craft;
 use craft\web\Controller;
 use craft\web\Request;
+use GuzzleHttp\Exception\ClientException;
 use servd\DallEFieldtype\Plugin;
 use servd\DallEFieldtype\services\DallE;
 
@@ -25,7 +26,29 @@ class DallEFieldController extends Controller
 
         /** @var DallE $dalle */
         $dalle = Plugin::$plugin->dalle;
-        $urls = $dalle->generateImages($prompt, $fieldId, $count);
+        try {
+            $urls = $dalle->generateImages($prompt, $fieldId, $count);
+        } catch(ClientException $e) {
+
+            $response = json_decode($e->getResponse()->getBody());
+            if (empty($response)) {
+                return $this->asJson([
+                    'result' => 'error',
+                    'message' => "There was an error communicating with the Open AI API.",
+                ])->setStatusCode(500);
+            }
+            
+            return $this->asJson([
+                'result' => 'error',
+                'message' => $response->error->message ?? "There was an error communicating with the Open AI API.",
+            ])->setStatusCode(500);
+
+        } catch(\Exception $e) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => $e->getMessage(),
+            ])->setStatusCode(500);
+        }
 
         return $this->asJson([
             'result' => 'success',
@@ -45,7 +68,29 @@ class DallEFieldController extends Controller
 
         /** @var DallE $dalle */
         $dalle = Plugin::$plugin->dalle;
-        $urls = $dalle->generateVariants($imageUrl, $count);
+        try {
+            $urls = $dalle->generateVariants($imageUrl, $count);
+        } catch(ClientException $e) {
+
+            $response = json_decode($e->getResponse()->getBody());
+            if (empty($response)) {
+                return $this->asJson([
+                    'result' => 'error',
+                    'message' => "There was an error communicating with the Open AI API.",
+                ])->setStatusCode(500);
+            }
+            
+            return $this->asJson([
+                'result' => 'error',
+                'message' => $response->error->message ?? "There was an error communicating with the Open AI API.",
+            ])->setStatusCode(500);
+
+        } catch(\Exception $e) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => $e->getMessage(),
+            ])->setStatusCode(500);
+        }
 
         return $this->asJson([
             'result' => 'success',
@@ -67,7 +112,29 @@ class DallEFieldController extends Controller
 
         /** @var DallE $dalle */
         $dalle = Plugin::$plugin->dalle;
-        $urls = $dalle->extendHorizontally($imageUrl, $prompt, $fieldId, $count);
+        try {
+            $urls = $dalle->extendHorizontally($imageUrl, $prompt, $fieldId, $count);
+        } catch(ClientException $e) {
+
+            $response = json_decode($e->getResponse()->getBody());
+            if (empty($response)) {
+                return $this->asJson([
+                    'result' => 'error',
+                    'message' => "There was an error communicating with the Open AI API.",
+                ])->setStatusCode(500);
+            }
+            
+            return $this->asJson([
+                'result' => 'error',
+                'message' => $response->error->message ?? "There was an error communicating with the Open AI API.",
+            ])->setStatusCode(500);
+
+        } catch(\Exception $e) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => $e->getMessage(),
+            ])->setStatusCode(500);
+        }
 
         return $this->asJson([
             'result' => 'success',
@@ -96,7 +163,14 @@ class DallEFieldController extends Controller
         // Convert the url into an asset
         /** @var DallE $dalle */
         $dalle = Plugin::$plugin->dalle;
-        $asset = $dalle->saveImageAsAsset($url, $folder);
+        try{
+            $asset = $dalle->saveImageAsAsset($url, $folder);
+        } catch(\Exception $e) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => $e->getMessage(),
+            ])->setStatusCode(500);
+        }
 
         return $this->asJson([
             'result' => 'success',
@@ -129,7 +203,14 @@ class DallEFieldController extends Controller
         // Convert the url into an asset
         /** @var DallE $dalle */
         $dalle = Plugin::$plugin->dalle;
-        $asset = $dalle->saveImagePairAsAsset($leftUrl, $rightUrl, $folder);
+        try{
+            $asset = $dalle->saveImagePairAsAsset($leftUrl, $rightUrl, $folder);    
+        } catch(\Exception $e) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => $e->getMessage(),
+            ])->setStatusCode(500);
+        }
 
         return $this->asJson([
             'result' => 'success',

@@ -188,7 +188,8 @@ function selectImage(imageUrl) {
         },
         redirect: 'follow', 
         signal: globalAjaxAborter.signal   
-    }).then((response) => response.json()).then((data) => {
+    }).then(handleFetchErrors)
+    .then((response) => response.json()).then((data) => {
 
         let elementId = data.assetId;
         let title = data.title;
@@ -230,6 +231,9 @@ function selectImage(imageUrl) {
         window.dalle[fieldId].selectElements(elements)
         hideModal();
         resetModal();
+    }).catch(error => {
+        displayFetchErrors(error);
+        //TODO undo any loading state set when saving the image
     });
 }
 
@@ -250,7 +254,9 @@ function selectImagePair(leftImageUrl, rightImageUrl) {
         },
         redirect: 'follow',    
         signal: globalAjaxAborter.signal
-    }).then((response) => response.json()).then((data) => {
+    
+    }).then(handleFetchErrors)
+    .then((response) => response.json()).then((data) => {
 
         let elementId = data.assetId;
         let title = data.title;
@@ -292,6 +298,9 @@ function selectImagePair(leftImageUrl, rightImageUrl) {
         window.dalle[fieldId].selectElements(elements)
         hideModal();
         resetModal();
+    }).catch(error => {
+        displayFetchErrors(error);
+        //TODO undo any loading state set when saving the image
     });
 }
 
@@ -316,10 +325,14 @@ function performNewGeneration(prompt) {
         },
         redirect: 'follow',  
         signal: globalAjaxAborter.signal  
-    }).then((response) => response.json()).then((data) => {
-        
-        //triggerModal(generator, data.urls);
+    }).then(handleFetchErrors)
+    .then((response) => response.json()).then((data) => {
         populateResults(data.urls);
+    }).catch(error => {
+        displayFetchErrors(error);
+        setTimeout(function(){ //Gives the XHR request a chance to cleanly close before the abort is fired
+            clearModal(true);
+        }, 100);
     });
 }
 
@@ -365,8 +378,14 @@ function generateVariants(imageUrl) {
         },
         redirect: 'follow',    
         signal: globalAjaxAborter.signal
-    }).then((response) => response.json()).then((data) => {
+    }).then(handleFetchErrors)
+    .then((response) => response.json()).then((data) => {
         populateVaryResults(data.urls);
+    }).catch(error => {
+        displayFetchErrors(error);
+        setTimeout(function(){ //Gives the XHR request a chance to cleanly close before the abort is fired
+            clearDetailsRHS();
+        }, 100);
     });
 }
 
@@ -414,8 +433,14 @@ function generateExtensions(imageUrl) {
         },
         redirect: 'follow',    
         signal: globalAjaxAborter.signal
-    }).then((response) => response.json()).then((data) => {
+    }).then(handleFetchErrors)
+    .then((response) => response.json()).then((data) => {
         populateExtensions(data.left, data.right);
+    }).catch(error => {
+        displayFetchErrors(error);
+        setTimeout(function(){ //Gives the XHR request a chance to cleanly close before the abort is fired
+            clearDetailsRHS();
+        }, 100);
     });
 }
 
@@ -484,3 +509,28 @@ function populateExtensions(leftUrls, rightUrls) {
     })
 }
 
+function handleFetchErrors(response) {
+    if (!response.ok) {
+        throw response;
+    }
+    return response;
+}
+
+function displayFetchErrors(error) {
+    if (error.text) { //This is an HTTP reponse
+        error.text().then(text => {
+            try{
+                let parsed = JSON.parse(text); //Is it JSON?
+                if (parsed.hasOwnProperty('message')) { //Does it have a message?
+                    Craft.cp.displayError(parsed.message);
+                } else {
+                    Craft.cp.displayError('An unknown error occurred.');
+                }
+            } catch(e) {
+                Craft.cp.displayError(text); //Failed parsing JSON, output body
+            }
+        });
+    } else {
+        Craft.cp.displayError('An unknown error occurred.'); //Some other error
+    }
+}
