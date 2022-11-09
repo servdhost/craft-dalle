@@ -91,11 +91,9 @@ for (generator of generators) {
         triggerModal($(this).parents('.dalle-generator')[0]);
     });
 
-    
     let fieldId = generator.getAttribute('data-fieldid');
     setInterval(function(){
         let limit = window.dalle[fieldId].settings.limit;
-        console.log(limit);
         if (limit != null && window.dalle[fieldId].$elements.length >= limit) {
             $(launchButton).hide();
         } else {
