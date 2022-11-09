@@ -90,6 +90,18 @@ for (generator of generators) {
     launchButton.addEventListener('click', function(e){
         triggerModal($(this).parents('.dalle-generator')[0]);
     });
+
+    
+    let fieldId = generator.getAttribute('data-fieldid');
+    setInterval(function(){
+        let limit = window.dalle[fieldId].settings.limit;
+        console.log(limit);
+        if (limit != null && window.dalle[fieldId].$elements.length >= limit) {
+            $(launchButton).hide();
+        } else {
+            $(launchButton).show();
+        }
+    }, 200);
 }
 
 function cancelInflight(){
