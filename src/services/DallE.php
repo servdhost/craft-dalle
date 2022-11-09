@@ -17,13 +17,6 @@ class DallE extends Component
 
     public function generateImages($prompt, $fieldId = null, $count = 1)
     {
-        sleep(1);
-        return [
-            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-09-00-22-55.png',
-            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-09-00-22-55.png',
-        ];
 
         $settings = Plugin::$plugin->getSettings();
 
@@ -61,13 +54,6 @@ class DallE extends Component
     public function generateVariants($sampleUrl, $count = 1)
     {
 
-        sleep(1);
-        return [
-            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-09-00-22-55.png',
-            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-        ]; 
-
         $settings = Plugin::$plugin->getSettings();
 
         // Download the asset
@@ -102,23 +88,6 @@ class DallE extends Component
 
     public function extendHorizontally($sampleUrl, $prompt, $fieldId = null, $count = 1)
     {
-
-        sleep(1);
-        return [
-            'left' => [
-                'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-                'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-                'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-                'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-            ],
-            'right' => [
-                'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-                'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-                'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-                'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-            ],
-        ];
-
 
         $settings = Plugin::$plugin->getSettings();
 
@@ -205,8 +174,6 @@ class DallE extends Component
     public function saveImageAsAsset($url, $folder)
     {
 
-        //return Craft::$app->getAssets()->getAssetById(115330);
-
         // Download the asset
         /** @var ServicesPath $pathService */
         $pathService = Craft::$app->getPath();
@@ -237,8 +204,6 @@ class DallE extends Component
 
     public function saveImagePairAsAsset($leftUrl, $rightUrl, $folder)
     {
-
-        //return Craft::$app->getAssets()->getAssetById(115330);
 
         // Download the asset
         /** @var ServicesPath $pathService */
@@ -282,6 +247,3 @@ class DallE extends Component
     }
 
 }
-
-
-//GET https://labs.openai.com/api/labs/billing/credit_summary
