@@ -7,6 +7,8 @@ use craft\base\Model;
 use craft\base\Plugin as BasePlugin;
 use craft\events\RegisterComponentTypesEvent;
 use craft\services\Fields;
+use servd\DallEFieldtype\fieldtypes\DallEField;
+use servd\DallEFieldtype\services\DallE;
 use yii\base\Event;
 
 class Plugin extends BasePlugin
@@ -38,7 +40,7 @@ class Plugin extends BasePlugin
 
 
         // $this->registerVariables();
-        // $this->registerComponentsAndServices();
+        $this->registerComponentsAndServices();
         // $this->initialiseComponentsAndServices();
     }
 
@@ -62,7 +64,9 @@ class Plugin extends BasePlugin
 
     public function registerComponentsAndServices()
     {
-        
+        $this->setComponents([
+            'dalle' => DallE::class
+        ]);   
     }
 
     public function initialiseComponentsAndServices()

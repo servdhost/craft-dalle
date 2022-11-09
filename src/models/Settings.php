@@ -7,7 +7,7 @@ use craft\base\Model;
 
 class Settings extends Model
 {
-    public $someSetting = false;
+    public $apiKey = '';
 
     public function rules(): array
     {

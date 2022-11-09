@@ -1,3 +1,5 @@
+{% import "_includes/forms" as forms %}
+
 {% if name ?? false %}
     {{ hiddenInput(name, '') }}
 {% endif -%}
@@ -43,6 +45,18 @@
     </div>
 </div>
 
+<div id="dalle-generator-{{ random(10000,99999) }}" class="dalle-generator field" data-fieldid="{{ fieldId }}">
+    <div>
+        {{ forms.button({
+            label: "Generate Image with Dall-E",
+            class: "dalle-generate-button"
+        }) }}
+    </div>
+</div>
+
+
+
+{% do view.registerAssetBundle("servd\\DallEFieldtype\\assetbundles\\DallEFieldtypeBundle") %}
 {% do view.registerAssetBundle("craft\\web\\assets\\prismjs\\PrismJsAsset") %}
 
 {% set jsSettings = {
@@ -68,5 +82,8 @@
 } %}
 
 {% js %}
-    new {{ jsClass }}({{ jsSettings|json_encode|raw }});
+    if(!window.dalle){
+        window.dalle = {};
+    }
+    window.dalle[{{ fieldId }}] = new {{ jsClass }}({{ jsSettings|json_encode|raw }});
 {% endjs %}

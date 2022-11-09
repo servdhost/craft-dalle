@@ -1,1 +1,17 @@
-Settings
+{% import "_includes/forms" as forms %}
+
+
+<fieldset>
+	<h2>General Plugin Settings</h2>
+
+	{{ forms.autosuggestField({
+        label: "Dall-E API Key",
+        id: 'apiKey',
+        name: 'apiKey',
+        suggestEnvVars: true,
+        value: settings.apiKey,
+        instructions: 'An OpenAI API key with access to Dall-E',
+        placeholder: ""
+    }) }}
+
+</fieldset>
