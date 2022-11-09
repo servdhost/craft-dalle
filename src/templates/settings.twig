@@ -14,4 +14,17 @@
         placeholder: ""
     }) }}
 
+
+    {{ forms.textField({
+        label: 'Generation count'|t('app'),
+        instructions: 'The number of images that should be created for each generation request. Min:1, Max: 8',
+        id: 'count',
+        name: 'count',
+        value: settings.count,
+        size: 2,
+        errors: settings.getErrors('count'),
+        tip: 'Each image generation costs $, but generating several options at once helps editors to make quicker choices.',
+    }) }}
+
+
 </fieldset>

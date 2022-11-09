@@ -19,10 +19,11 @@ class DallEFieldController extends Controller
         /** @var Request $req */
         $req = Craft::$app->getRequest();
 
+        $settings = Plugin::$plugin->getSettings();
+
         $prompt = $req->getQueryParam('prompt');
         $fieldId = $req->getQueryParam('fieldId');
-        $count = $req->getQueryParam('count', '1');
-        $count = intval($count);
+        $count = intval($settings->count);
 
         /** @var DallE $dalle */
         $dalle = Plugin::$plugin->dalle;
@@ -62,9 +63,10 @@ class DallEFieldController extends Controller
         /** @var Request $req */
         $req = Craft::$app->getRequest();
 
+        $settings = Plugin::$plugin->getSettings();
+
         $imageUrl = $req->getQueryParam('imageUrl');
-        $count = $req->getQueryParam('count', '1');
-        $count = intval($count);
+        $count = intval($settings->count);
 
         /** @var DallE $dalle */
         $dalle = Plugin::$plugin->dalle;
@@ -104,11 +106,12 @@ class DallEFieldController extends Controller
         /** @var Request $req */
         $req = Craft::$app->getRequest();
 
+        $settings = Plugin::$plugin->getSettings();
+
         $imageUrl = $req->getQueryParam('imageUrl');
         $prompt = $req->getQueryParam('prompt');
         $fieldId = $req->getQueryParam('fieldId');
-        $count = $req->getQueryParam('count', '1');
-        $count = intval($count);
+        $count = intval($settings->count);
 
         /** @var DallE $dalle */
         $dalle = Plugin::$plugin->dalle;

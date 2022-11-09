@@ -45,7 +45,7 @@
         label: 'Image generation prompt prefix',
         value: field.preText,
         instructions: 'This text will be included as a prefix to all image generation prompts from this field',
-        tip: 'A good tip is to define a common style here, such as "A detailed pencil sketch of "',
+        tip: 'Perhaps define a common style here, such as "A detailed pencil sketch of "',
         placeholder: ''|t('app'),
     }) }}
 
@@ -55,12 +55,9 @@
         label: 'Image generation prompt suffix',
         value: field.postText,
         instructions: 'This text will be included as a suffix to all image generation prompts from this field',
-        tip: 'A good tip is to define common prompt modifiers here, such as "4k, photorealistic, wide-angle"',
+        tip: 'Perhaps define common prompt modifiers here, such as "4k, photorealistic, wide-angle"',
         placeholder: ''|t('app'),
     }) }}
-
-
-
 
     {{ forms.checkboxField({
         label: 'Restrict assets to a single location'|t('app'),

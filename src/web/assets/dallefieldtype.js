@@ -308,11 +308,9 @@ function selectImagePair(leftImageUrl, rightImageUrl) {
 function performNewGeneration(prompt) {
     clearModal();
     resultsLoading();
-    let count = 4;
     let data = {
         fieldId: activeGenerator.getAttribute('data-fieldid'),
         prompt,
-        count
     }
 
     let generateUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/generate-images&' + new URLSearchParams(data);
@@ -367,7 +365,6 @@ function generateVariants(imageUrl) {
 
     let varyData = {
         imageUrl,
-        count: 3
     }
     let varyUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/generate-variants&' + new URLSearchParams(varyData);
     fetch(varyUrl, {
@@ -421,7 +418,6 @@ function generateExtensions(imageUrl) {
         imageUrl,
         prompt: $editModalPromptInput.val(),
         fieldId: activeGenerator.getAttribute('data-fieldid'),
-        count: 4
     }
 
     let extendUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/extend-horizontally&' + new URLSearchParams(extendData);
