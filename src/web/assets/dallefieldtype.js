@@ -1,5 +1,7 @@
 //Hook the dall-e generate form
 
+let globalAjaxAborter = new AbortController();
+
 let $editModalWrapper = $('<div class="modal" style="overflow:auto;height:100%;"><div id="modal" class="body"><header class="header"><h2>Dall-E Generator</h2></header><div class="dalle-modal-content"></div></div></div>');
 let $editModalContent = $editModalWrapper.find('.dalle-modal-content');
 $editModalContent.append($(
@@ -13,16 +15,64 @@ $editModalContent.append($(
     </div>`)
 );
 
-$editModalResultsWrapper = $('<div class="modal-results-wrapper"></div>');
+let $editModalResultsWrapper = $(`
+    <div class="modal-results-wrapper">
+        <div class="modal-results-placeholder">
+            <p>A cat wearing a raincoat?</p>
+            <p>Twelve 50p coins all showing heads?</p>
+            <p>A scene from a scary movie?</p>
+        </div>
+    </div>
+`);
 $editModalContent.append($editModalResultsWrapper);
 
-$editModalExtensionsWrapper = $('<div class="modal-extensions-wrapper"></div>');
-$editModalContent.append($editModalExtensionsWrapper);
+$editModalDetailsWrapper = $(`
+    <div class="modal-details-wrapper">
+        <div class="modal-details-lhs">
+            <div class="modal-details-lhs-img">
+                <img src="">
+            </div>
+            <button class="submit btn modal-details-use">Use this</button>
+            <button class="btn modal-details-variants">Generate variants</button>
+            <button class="btn modal-details-extend">Extend horizontally</button>
+            <button class="btn modal-details-back">Back</button>
+        </div>
+        <div class="modal-details-rhs">
+            
+        </div>
+    </div>
+`);
+
+let $editModalDetailsRhs = $editModalDetailsWrapper.find('.modal-details-rhs');
+
+$editModalDetailsWrapper.find('.modal-details-back').click(function(e){
+    cancelInflight();
+    closeDetails();
+});
+
+$editModalDetailsWrapper.find('.modal-details-use').click(function(e){
+    cancelInflight();
+    selectImage($editModalDetailsWrapper.attr('data-url'));
+});
+
+$editModalDetailsWrapper.find('.modal-details-variants').click(function(e){
+    cancelInflight();
+    generateVariants($editModalDetailsWrapper.attr('data-url'));
+});
+
+$editModalDetailsWrapper.find('.modal-details-extend').click(function(e){
+    cancelInflight();
+    generateExtensions($editModalDetailsWrapper.attr('data-url'));
+});
+
+$editModalDetailsWrapper.hide();
+$editModalContent.append($editModalDetailsWrapper);
 
 let $editModalPromptInput = $editModalContent.find('.dalle-prompt');
 let $editModalPromptButton = $editModalContent.find('.dalle-generate-button');
 
 $editModalPromptButton.click(function(e){
+    cancelInflight();
     performNewGeneration($editModalPromptInput.val());
 })
 
@@ -35,294 +85,68 @@ let activeGenerator = null;
 let generators = document.getElementsByClassName('dalle-generator');
 for (generator of generators) {
     let launchButton = generator.getElementsByClassName('dalle-generate-button')[0];
-    // let promptInput = generator.getElementsByClassName('dalle-prompt')[0];
-    // let fieldId = generator.getAttribute('data-fieldid');
-    // let resultsPane = generator.getElementsByClassName('dalle-results-pane')[0];
-    // let resultsContainer = resultsPane.getElementsByClassName('dalle-results')[0];
-    // let extensionsPane = generator.getElementsByClassName('dalle-extensions-pane')[0];
-    // let extensionsContainer = extensionsPane.getElementsByClassName('dalle-extensions-results')[0];
-    // console.log(resultsContainer);
-
     if(!launchButton) continue;
     
     launchButton.addEventListener('click', function(e){
-        triggerModal(generator);
-        
-        // Clear any existing results
-        // resultsContainer.innerHTML = "";
-
-        // let prompt = promptInput.value;
-        // let count = 4;
-        // let data = {
-        //     fieldId,
-        //     prompt,
-        //     count
-        // }
-        
-        // let generateUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/generate-images&' + new URLSearchParams(data);
-        
-        // fetch(generateUrl, {
-        //     method: 'GET',
-        //     mode: 'same-origin',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     redirect: 'follow',    
-        // }).then((response) => response.json()).then((data) => {
-            
-        //     triggerModal(generator, data.urls);
-        //     //populateResults(generator, data.urls);
-            
-        // });
-
+        triggerModal($(this).parents('.dalle-generator')[0]);
     });
 }
 
-// function populateResults(generator, urls)
-// {
-//     let promptInput = generator.getElementsByClassName('dalle-prompt')[0];
-//     let fieldId = generator.getAttribute('data-fieldid');
-//     let resultsPane = generator.getElementsByClassName('dalle-results-pane')[0];
-//     let resultsContainer = $('<div></div>'); //resultsPane.getElementsByClassName('dalle-results')[0];
-//     let extensionsPane = generator.getElementsByClassName('dalle-extensions-pane')[0];
-//     let extensionsContainer = extensionsPane.getElementsByClassName('dalle-extensions-results')[0];
-    
-//     resultsContainer.innerHTML = '';
-
-//     var $div = $('<div class="modal"></div>');
-
-//     for (imageUrl of urls) {
-//         let wrapper = document.createElement('div');
-//         wrapper.classList.add('dalle-preview-item');
-
-//         let img = document.createElement('img');
-//         img.setAttribute('src', imageUrl);
-
-//         let buttonHolder = document.createElement('div');
-//         buttonHolder.classList.add('dalle-preview-item-buttons');
-
-//         let useButton = document.createElement('button');
-//         useButton.setAttribute('type', 'button');
-//         useButton.classList.add('btn');
-//         //useButton.classList.add('');
-//         useButton.innerHTML = 'Use this';
-
-//         let useData = {
-//             imageUrl,
-//             fieldId
-//         }
-//         useButton.addEventListener('click', function(e){
-//             let useUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/use-image&' + new URLSearchParams(useData);
-//             fetch(useUrl, {
-//                 method: 'GET',
-//                 mode: 'same-origin',
-//                 headers: {
-//                     'Content-Type': 'application/json'
-//                 },
-//                 redirect: 'follow',    
-//             }).then((response) => response.json()).then((data) => {
-
-//                 // Need to load it into the asset selector
-//                 // 'Element' are objects which looks like this:
-//                 /*
-//                  return {
-//                     id: $element.data('id'),
-//                     siteId: $element.data('site-id'),
-//                     label: $element.data('label'),
-//                     status: $element.data('status'),
-//                     url: $element.data('url'),
-//                     hasThumb: $element.hasClass('hasthumb'),
-//                     $element: $element,
-//                     };
-//                     */
-//                 // $element is a DOM element we might need to build
-//                 /*
-//                 <div 
-//                     class="element large hasthumb" 
-//                     title="Dall-E generated image 2022-11-08 18:17:29" 
-//                     data-kind="image" 
-//                     data-image-width="2200" 
-//                     data-image-height="1467" 
-//                     data-peer-file="" 
-//                     data-movable="" 
-//                     data-replaceable="" 
-//                     data-type="craft\elements\Asset" 
-//                     data-id="115322" 
-//                     data-site-id="1" 
-//                     data-status="enabled" 
-//                     data-label="Dall-E generated image 2022-11-08 18:17:29" 
-//                     data-url="https://optimise2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-18-17-29.png?w=2200&amp;h=1467&amp;auto=compress%2Cformat&amp;fit=crop&amp;dm=1667931449&amp;s=fb6ddee0a5928e1514fd9f9ca986f012" 
-//                     data-settings="{&quot;context&quot;:&quot;modal&quot;,&quot;size&quot;:&quot;large&quot;,&quot;showStatus&quot;:false,&quot;showThumb&quot;:true,&quot;showLabel&quot;:true,&quot;showDraftName&quot;:true}" 
-//                     data-editable=""
-//                     ><div class="elementthumb checkered" data-sizes="120px" data-srcset="https://optimise2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-18-17-29.png?w=120&amp;h=80&amp;auto=compress%2Cformat&amp;fit=crop&amp;dm=1667931449&amp;s=2154db6077236272e0c0682a3d26a24b 120w, https://optimise2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-18-17-29.png?w=240&amp;h=160&amp;auto=compress%2Cformat&amp;fit=crop&amp;dm=1667931449&amp;s=498db3d714969a6c776b7d58f3b01371 240w"><img sizes="120px" srcset="https://optimise2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-18-17-29.png?w=120&amp;h=80&amp;auto=compress%2Cformat&amp;fit=crop&amp;dm=1667931449&amp;s=2154db6077236272e0c0682a3d26a24b 120w, https://optimise2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-18-17-29.png?w=240&amp;h=160&amp;auto=compress%2Cformat&amp;fit=crop&amp;dm=1667931449&amp;s=498db3d714969a6c776b7d58f3b01371 240w" alt=""></div><div class="label"><span class="title">Dall-E generated image 2022-11-08 18:17:29</span></div></div>
-//                 */
-
-//                 // How to find a reference to the field's JS object?
-
-//                 let elementId = data.assetId;
-//                 let title = data.title;
-//                 let siteId = data.siteId;
-//                 let imageUrl = data.imageUrl;
-
-//                 let elementString = `<div 
-//                     class="element large hasthumb" 
-//                     data-kind="image" 
-//                     data-image-width="2200" 
-//                     data-image-height="1467" 
-//                     data-peer-file="" 
-//                     data-movable="" 
-//                     data-replaceable="" 
-//                     data-type="craft\elements\Asset" 
-//                     data-site-id="1" 
-//                     data-status="enabled" 
-//                     data-settings="{&quot;context&quot;:&quot;modal&quot;,&quot;size&quot;:&quot;large&quot;,&quot;showStatus&quot;:false,&quot;showThumb&quot;:true,&quot;showLabel&quot;:true,&quot;showDraftName&quot;:true}" 
-//                     data-editable=""
-//                 >
-//                     <div class="elementthumb checkered" data-sizes="120px" data-srcset="${imageUrl} 120w">
-//                         <img sizes="120px" srcset="${imageUrl} 120w" alt="">
-//                     </div>
-//                     <div class="label"><span class="title">${title}</span></div>
-//                 </div>`;
-
-//                 let element = $(elementString);
-//                 element.data('id', elementId);
-//                 element.data('url', imageUrl);
-//                 element.data('site-id', siteId);
-//                 element.data('label', title);
-//                 element.attr('title', title);
-
-//                 let elements = [
-//                     {
-//                         id: elementId,
-//                         $element: element
-//                     }
-//                 ]
-//                 window.dalle[fieldId].selectElements(elements)
-
-//             });
-//         })
-
-//         let variantsButton = document.createElement('button');
-//         variantsButton.setAttribute('type', 'button');
-//         variantsButton.classList.add('btn');
-//         //variantsButton.classList.add('');
-//         variantsButton.innerHTML = 'Generate variants';
-
-//         let variantsData = {
-//             imageUrl,
-//             count: 4
-//         }
-//         variantsButton.addEventListener('click', function(e){
-//             let useUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/generate-variants&' + new URLSearchParams(variantsData);
-//             fetch(useUrl, {
-//                 method: 'GET',
-//                 mode: 'same-origin',
-//                 headers: {
-//                     'Content-Type': 'application/json'
-//                 },
-//                 redirect: 'follow',    
-//             }).then((response) => response.json()).then((data) => {
-//                 populateResults(generator, data.urls);
-//             });
-//         });
-
-//         let extendButton = document.createElement('button');
-//         extendButton.setAttribute('type', 'button');
-//         extendButton.classList.add('btn');
-//         //extendButton.classList.add('');
-//         extendButton.innerHTML = 'Extend horizontally';
-
-//         extendButton.addEventListener('click', function(e){
-//             let extendData = {
-//                 imageUrl,
-//                 prompt: promptInput.value,
-//                 fieldId: fieldId,
-//                 count: 4
-//             }
-//             let useUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/extend-horizontally&' + new URLSearchParams(extendData);
-//             fetch(useUrl, {
-//                 method: 'GET',
-//                 mode: 'same-origin',
-//                 headers: {
-//                     'Content-Type': 'application/json'
-//                 },
-//                 redirect: 'follow',    
-//             }).then((response) => response.json()).then((data) => {
-//                 populateExtensions(generator, data.left, data.right);
-//             });
-//         });
-
-
-//         buttonHolder.appendChild(useButton);
-//         buttonHolder.appendChild(variantsButton);
-//         buttonHolder.appendChild(extendButton);
-//         wrapper.appendChild(img);
-//         wrapper.appendChild(buttonHolder);
-
-//         //resultsContainer.append($(wrapper));
-//     $div.append(wrapper);
-
-//     }
-
-    
-//     var myModal = new Garnish.Modal($div);
-// }
-
-// function populateExtensions(generator, leftUrls, rightUrls)
-// {
-//     let promptInput = generator.getElementsByClassName('dalle-prompt')[0];
-//     let fieldId = generator.getAttribute('data-fieldid');
-//     let resultsPane = generator.getElementsByClassName('dalle-results-pane')[0];
-//     let resultsContainer = resultsPane.getElementsByClassName('dalle-results')[0];
-//     let extensionsPane = generator.getElementsByClassName('dalle-extensions-pane')[0];
-//     let extensionsContainer = extensionsPane.getElementsByClassName('dalle-extensions-results')[0];
-//     extensionsContainer.innerHTML = '';
-
-//     let wrapper = document.createElement('div');
-//     wrapper.classList.add('dalle-extensions-wrapper');
-
-//     for (let i = 0; i<leftUrls.length; i++) {
-//         let leftUrl = leftUrls[i];
-//         let rightUrl = rightUrls[i];
-        
-//         let extensionsRow = document.createElement('div');
-//         extensionsRow.classList.add('dalle-extensions-row');
-
-//         let leftImage = document.createElement('img');
-//         leftImage.setAttribute('src', leftUrl);
-
-//         let rightImage = document.createElement('img');
-//         rightImage.setAttribute('src', rightUrl);
-
-//         extensionsRow.appendChild(leftImage);
-//         extensionsRow.appendChild(rightImage);
-
-//         wrapper.appendChild(extensionsRow);
-//     }
-
-//     extensionsContainer.appendChild(wrapper);
-
-// }
+function cancelInflight(){
+    globalAjaxAborter.abort();
+    globalAjaxAborter = new AbortController();
+}
 
 function showModal(){
     editModal.show();
 }
 
 function hideModal(){
+    cancelInflight();
     editModal.hide();
 }
 
 function resetModal() {
-    clearModal();
+    cancelInflight();
+    $editModalPromptInput.val('');
+    clearModal(true);
 }
 
-function clearModal() {
+function clearModal(showPlaceholder = false) {
+    cancelInflight();
+    closeDetails();
+    if (showPlaceholder) {
+        setResultsToPlaceholder();
+    } else {
+        clearResults();
+    }
+}
+
+function setResultsToPlaceholder() {
+    clearResults();
+    $editModalResultsWrapper.append($(`
+    <div class="modal-results-placeholder">
+            <p>A cat wearing a raincoat?</p>
+            <p>Twelve 50p coins all showing heads?</p>
+            <p>A scene from a scary movie?</p>
+        </div>
+    `));
+}
+
+function clearResults() {
     $editModalResultsWrapper.empty();
-    $editModalExtensionsWrapper.empty();
 }
 
-function clearExtensions() {
-    $editModalExtensionsWrapper.empty();
+function resultsLoading() {
+    clearResults();
+    let loading = $('<div class="dalle-spinner"><div class="animation"></div></div>');
+    $editModalResultsWrapper.append(loading);
+}
+
+function detailsRHSLoading() {
+    clearDetailsRHS();
+    let loading = $('<div class="dalle-spinner"><div class="animation"></div></div>');
+    $editModalDetailsRhs.append(loading);
 }
 
 function triggerModal(generator) {
@@ -331,8 +155,150 @@ function triggerModal(generator) {
     showModal();
 }
 
+function closeDetails() {
+    $editModalDetailsWrapper.hide();
+    $editModalResultsWrapper.show();
+}
+
+function showDetails(imageUrl) {
+    $editModalResultsWrapper.hide();
+    $editModalDetailsWrapper.find('.modal-details-lhs img').attr('src', imageUrl);
+    $editModalDetailsWrapper.attr('data-url', imageUrl);
+    $editModalDetailsWrapper.show();
+    clearDetailsRHS();
+}
+
+function clearDetailsRHS() {
+    $editModalDetailsRhs.empty();
+}
+
+function selectImage(imageUrl) {
+    let fieldId = activeGenerator.getAttribute('data-fieldid');
+    let useData = {
+        imageUrl: $editModalDetailsWrapper.attr('data-url'),
+        fieldId,
+    }
+
+    let useUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/use-image&' + new URLSearchParams(useData);
+    fetch(useUrl, {
+        method: 'GET',
+        mode: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        redirect: 'follow', 
+        signal: globalAjaxAborter.signal   
+    }).then((response) => response.json()).then((data) => {
+
+        let elementId = data.assetId;
+        let title = data.title;
+        let siteId = data.siteId;
+        let imageUrl = data.imageUrl;
+
+        let elementString = `<div 
+            class="element large hasthumb" 
+            data-kind="image" 
+            data-image-width="2200" 
+            data-image-height="1467" 
+            data-peer-file="" 
+            data-movable="" 
+            data-replaceable="" 
+            data-type="craft\elements\Asset" 
+            data-status="enabled" 
+            data-settings="{&quot;context&quot;:&quot;modal&quot;,&quot;size&quot;:&quot;large&quot;,&quot;showStatus&quot;:false,&quot;showThumb&quot;:true,&quot;showLabel&quot;:true,&quot;showDraftName&quot;:true}" 
+            data-editable=""
+        >
+            <div class="elementthumb checkered" data-sizes="120px" data-srcset="${imageUrl} 120w">
+                <img sizes="120px" srcset="${imageUrl} 120w" alt="">
+            </div>
+            <div class="label"><span class="title">${title}</span></div>
+        </div>`;
+
+        let element = $(elementString);
+        element.data('id', elementId);
+        element.data('url', imageUrl);
+        element.data('site-id', siteId);
+        element.data('label', title);
+        element.attr('title', title);
+
+        let elements = [
+            {
+                id: elementId,
+                $element: element
+            }
+        ]
+        window.dalle[fieldId].selectElements(elements)
+        hideModal();
+        resetModal();
+    });
+}
+
+function selectImagePair(leftImageUrl, rightImageUrl) {
+    let fieldId = activeGenerator.getAttribute('data-fieldid');
+    let useData = {
+        leftImageUrl,
+        rightImageUrl,
+        fieldId,
+    }
+
+    let useUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/use-image-pair&' + new URLSearchParams(useData);
+    fetch(useUrl, {
+        method: 'GET',
+        mode: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        redirect: 'follow',    
+        signal: globalAjaxAborter.signal
+    }).then((response) => response.json()).then((data) => {
+
+        let elementId = data.assetId;
+        let title = data.title;
+        let siteId = data.siteId;
+        let imageUrl = data.imageUrl;
+
+        let elementString = `<div 
+            class="element large hasthumb" 
+            data-kind="image" 
+            data-image-width="2200" 
+            data-image-height="1467" 
+            data-peer-file="" 
+            data-movable="" 
+            data-replaceable="" 
+            data-type="craft\elements\Asset" 
+            data-status="enabled" 
+            data-settings="{&quot;context&quot;:&quot;modal&quot;,&quot;size&quot;:&quot;large&quot;,&quot;showStatus&quot;:false,&quot;showThumb&quot;:true,&quot;showLabel&quot;:true,&quot;showDraftName&quot;:true}" 
+            data-editable=""
+        >
+            <div class="elementthumb checkered" data-sizes="120px" data-srcset="${imageUrl} 120w">
+                <img sizes="120px" srcset="${imageUrl} 120w" alt="">
+            </div>
+            <div class="label"><span class="title">${title}</span></div>
+        </div>`;
+
+        let element = $(elementString);
+        element.data('id', elementId);
+        element.data('url', imageUrl);
+        element.data('site-id', siteId);
+        element.data('label', title);
+        element.attr('title', title);
+
+        let elements = [
+            {
+                id: elementId,
+                $element: element
+            }
+        ]
+        window.dalle[fieldId].selectElements(elements)
+        hideModal();
+        resetModal();
+    });
+}
+
+
 function performNewGeneration(prompt) {
     clearModal();
+    resultsLoading();
     let count = 4;
     let data = {
         fieldId: activeGenerator.getAttribute('data-fieldid'),
@@ -348,7 +314,8 @@ function performNewGeneration(prompt) {
         headers: {
             'Content-Type': 'application/json'
         },
-        redirect: 'follow',    
+        redirect: 'follow',  
+        signal: globalAjaxAborter.signal  
     }).then((response) => response.json()).then((data) => {
         
         //triggerModal(generator, data.urls);
@@ -359,15 +326,14 @@ function performNewGeneration(prompt) {
 function populateResults(urls) {
 
     clearModal();
+
     for (imageUrl of urls) {
         let $item = $(`
-        <div class="dalle-preview-item">
+        <div class="dalle-preview-item" data-url="${imageUrl}">
             <div class="dalle-preview-item-inner">
                 <img src="${imageUrl}">
                 <div class="dalle-preview-item-buttons">
-                    <button type="button" class="btn dalle-use-button">Use this</button>
-                    <button type="button" class="btn dalle-vary-button">Generate variations</button>
-                    <button type="button" class="btn dalle-extend-button">Extend horizontally</button>
+                    <button type="button" class="btn dalle-view-button">Select</button>
                 </div>
             </div>
         </div>
@@ -376,121 +342,145 @@ function populateResults(urls) {
         let fieldId = activeGenerator.getAttribute('data-fieldid');
         $editModalResultsWrapper.append($item);
 
-        $item.find('.dalle-use-button').click(function(e){
-
-            let useData = {
-                imageUrl,
-                fieldId,
-            }
-
-            let useUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/use-image&' + new URLSearchParams(useData);
-            fetch(useUrl, {
-                method: 'GET',
-                mode: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                redirect: 'follow',    
-            }).then((response) => response.json()).then((data) => {
-
-                let elementId = data.assetId;
-                let title = data.title;
-                let siteId = data.siteId;
-                let imageUrl = data.imageUrl;
-
-                let elementString = `<div 
-                    class="element large hasthumb" 
-                    data-kind="image" 
-                    data-image-width="2200" 
-                    data-image-height="1467" 
-                    data-peer-file="" 
-                    data-movable="" 
-                    data-replaceable="" 
-                    data-type="craft\elements\Asset" 
-                    data-status="enabled" 
-                    data-settings="{&quot;context&quot;:&quot;modal&quot;,&quot;size&quot;:&quot;large&quot;,&quot;showStatus&quot;:false,&quot;showThumb&quot;:true,&quot;showLabel&quot;:true,&quot;showDraftName&quot;:true}" 
-                    data-editable=""
-                >
-                    <div class="elementthumb checkered" data-sizes="120px" data-srcset="${imageUrl} 120w">
-                        <img sizes="120px" srcset="${imageUrl} 120w" alt="">
-                    </div>
-                    <div class="label"><span class="title">${title}</span></div>
-                </div>`;
-
-                let element = $(elementString);
-                element.data('id', elementId);
-                element.data('url', imageUrl);
-                element.data('site-id', siteId);
-                element.data('label', title);
-                element.attr('title', title);
-
-                let elements = [
-                    {
-                        id: elementId,
-                        $element: element
-                    }
-                ]
-                window.dalle[fieldId].selectElements(elements)
-                hideModal();
-            });
-        });
-
-
-        $item.find('.dalle-vary-button').click(function(e){
-
-            let varyData = {
-                imageUrl,
-                count: 4
-            }
-
-            let varyUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/generate-variants&' + new URLSearchParams(varyData);
-            fetch(varyUrl, {
-                method: 'GET',
-                mode: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                redirect: 'follow',    
-            }).then((response) => response.json()).then((data) => {
-                populateResults(data.urls);
-            });
-        });
-
-        $item.find('.dalle-extend-button').click(function(e){
-
-            let extendData = {
-                imageUrl,
-                prompt: $editModalPromptInput.val(),
-                fieldId: fieldId,
-                count: 4
-            }
-
-            let extendUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/extend-horizontally&' + new URLSearchParams(extendData);
-            fetch(extendUrl, {
-                method: 'GET',
-                mode: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                redirect: 'follow',    
-            }).then((response) => response.json()).then((data) => {
-                populateExtensions(data.left, data.right);
-            });
+        $item.find('.dalle-view-button').click(function(e){
+            showDetails($(this).parents('.dalle-preview-item').first().attr('data-url'));
         });
     }
 }
 
+function generateVariants(imageUrl) {
+    
+    detailsRHSLoading();
+
+    let varyData = {
+        imageUrl,
+        count: 3
+    }
+    let varyUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/generate-variants&' + new URLSearchParams(varyData);
+    fetch(varyUrl, {
+        method: 'GET',
+        mode: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        redirect: 'follow',    
+        signal: globalAjaxAborter.signal
+    }).then((response) => response.json()).then((data) => {
+        populateVaryResults(data.urls);
+    });
+}
+
+function populateVaryResults(urls) {
+    clearDetailsRHS();
+    $varyResultsWrapper = $('<div class="dalle-vary-results"></div>');
+
+    for (imageUrl of urls) {
+        let $item = $(`
+        <div class="dalle-vary-result" data-url="${imageUrl}">
+            <div class="dalle-vary-result-img">
+                <img src="${imageUrl}">
+            </div>
+            <button data-url="${imageUrl}" class="btn dalle-vary-select-button">Select</button>
+        </div>
+        `);
+
+        $item.find('.dalle-vary-select-button').click(function(e){
+            showDetails($(this).data('url'));
+        })
+        $varyResultsWrapper.append($item);
+    }
+
+    $editModalDetailsRhs.append($varyResultsWrapper);
+
+}
+
+function generateExtensions(imageUrl) {
+
+    detailsRHSLoading();
+
+    let extendData = {
+        imageUrl,
+        prompt: $editModalPromptInput.val(),
+        fieldId: activeGenerator.getAttribute('data-fieldid'),
+        count: 4
+    }
+
+    let extendUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/extend-horizontally&' + new URLSearchParams(extendData);
+    fetch(extendUrl, {
+        method: 'GET',
+        mode: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        redirect: 'follow',    
+        signal: globalAjaxAborter.signal
+    }).then((response) => response.json()).then((data) => {
+        populateExtensions(data.left, data.right);
+    });
+}
+
 function populateExtensions(leftUrls, rightUrls) {
-    clearExtensions()
+    clearDetailsRHS();
+    let $wrapper = $('<div class="dalle-extensions-wrapper"></div>');
+    let $headings = $(
+        `<div class="dalle-extensions-headings heading">
+            <legend class="">Select a left side</legend>
+            <legend class="">Select a right side</legend>
+        </div>`
+    );
+    $wrapper.append($headings);
+
+    $selectButtonWrapper = $('<div class="dalle-use-extensions-button-wrapper"></div>');
+    $selectButton = $('<button type="button" disabled class="submit btn dalle-use-extensions-button disabled">Use selected pair</button>');
+    $selectButtonWrapper.append($selectButton);
+
     for (let i = 0; i<leftUrls.length; i++) {
         let leftUrl = leftUrls[i];
         let rightUrl = rightUrls[i];
         $row = $(`
         <div class="dalle-extensions-row">
-            <img src="${leftUrl}">
-            <img src="${rightUrl}">
+            <a class="dalle-extensions-item dalle-extensions-item-left" data-url="${leftUrl}">
+                <div class="inner-shadow"></div>
+                <img src="${leftUrl}">
+            </a>
+            <a class="dalle-extensions-item dalle-extensions-item-right" data-url="${rightUrl}">
+                <div class="inner-shadow"></div>
+                <img src="${rightUrl}">
+            </a>
         </div>
         `);
-        $editModalExtensionsWrapper.append($row);
+        $wrapper.append($row);
+
+        $row.find('.dalle-extensions-item').click(function(e){
+            let button = $(this);
+            if (button.hasClass('dalle-extensions-item-left')) {
+                $wrapper.data('selected-left', button.data('url'));
+                $wrapper.find('.dalle-extensions-item-left.selected').removeClass('selected');
+                button.addClass('selected');
+            }
+            if (button.hasClass('dalle-extensions-item-right')) {
+                $wrapper.data('selected-right', button.data('url'));
+                $wrapper.find('.dalle-extensions-item-right.selected').removeClass('selected');
+                button.addClass('selected');
+            }
+
+            if($wrapper.data('selected-left') && $wrapper.data('selected-right')) {
+                $selectButton.prop("disabled", false);
+                $selectButton.removeClass('disabled');
+            } else {
+                $selectButton.prop("disabled", true);
+                $selectButton.addClass('disabled');
+            }
+
+        });
+
     }
+    $editModalDetailsRhs.append($wrapper);
+    $editModalDetailsRhs.append($selectButtonWrapper);
+
+    $selectButton.click(function(e){
+        cancelInflight();
+        selectImagePair($wrapper.data('selected-left'), $wrapper.data('selected-right'));
+    })
 }
+

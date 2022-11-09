@@ -42,19 +42,22 @@
             }) }}
         {% endif %}
         <div class="spinner hidden"></div>
+        <div id="dalle-generator-{{ random(10000,99999) }}" class="dalle-generator field" data-fieldid="{{ fieldId }}">
+            <div>
+                {{ forms.button({
+                    label: "Generate Image with Dall-E",
+                    class: [
+                    'btn',
+                    'icon',
+                    'add',
+                    'dashed',
+                    'dalle-generate-button',
+                    ]
+                }) }}
+            </div>
+        </div>
     </div>
 </div>
-
-<div id="dalle-generator-{{ random(10000,99999) }}" class="dalle-generator field" data-fieldid="{{ fieldId }}">
-    <div>
-        {{ forms.button({
-            label: "Generate Image with Dall-E",
-            class: "dalle-generate-button"
-        }) }}
-    </div>
-</div>
-
-
 
 {% do view.registerAssetBundle("servd\\DallEFieldtype\\assetbundles\\DallEFieldtypeBundle") %}
 {% do view.registerAssetBundle("craft\\web\\assets\\prismjs\\PrismJsAsset") %}

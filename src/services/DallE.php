@@ -17,14 +17,15 @@ class DallE extends Component
 
     public function generateImages($prompt, $fieldId = null, $count = 1)
     {
-        $settings = Plugin::$plugin->getSettings();
-
+        sleep(1);
         return [
             'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
+            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-09-00-22-55.png',
             'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
-            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
+            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-09-00-22-55.png',
         ];
+
+        $settings = Plugin::$plugin->getSettings();
 
         $fullPrompt = $prompt;
         if (!empty($fieldId)) {
@@ -59,6 +60,14 @@ class DallE extends Component
 
     public function generateVariants($sampleUrl, $count = 1)
     {
+
+        sleep(1);
+        return [
+            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-09-00-22-55.png',
+            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
+            'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
+        ]; 
+
         $settings = Plugin::$plugin->getSettings();
 
         // Download the asset
@@ -94,6 +103,7 @@ class DallE extends Component
     public function extendHorizontally($sampleUrl, $prompt, $fieldId = null, $count = 1)
     {
 
+        sleep(1);
         return [
             'left' => [
                 'https://cdn2.assets-servd.host/relieved-tarantula/production/dalle-generated-2022-11-08-19-25-23.png',
@@ -210,6 +220,52 @@ class DallE extends Component
 
         $asset = new Asset();
         $asset->tempFilePath = $tempPath;
+        $asset->filename = $filename;
+        $asset->folderId = $folder->id;
+        $asset->newFolderId = $folder->id;
+        $asset->kind = "Image";
+        $asset->title = $assetTitle;
+        $asset->avoidFilenameConflicts = true;
+        $asset->setVolumeId($folder->volumeId);
+        $asset->setScenario(Asset::SCENARIO_CREATE);
+
+        $asset->validate();
+        Craft::$app->getElements()->saveElement($asset, false);
+
+        return $asset;
+    }
+
+    public function saveImagePairAsAsset($leftUrl, $rightUrl, $folder)
+    {
+
+        //return Craft::$app->getAssets()->getAssetById(115330);
+
+        // Download the asset
+        /** @var ServicesPath $pathService */
+        $pathService = Craft::$app->getPath();
+        $leftTempPath = $pathService->getTempPath(true) . '/' . mt_rand(0, 9999999) . '.png';
+        file_put_contents($leftTempPath, file_get_contents($leftUrl));
+        $leftImage = new Imagick($leftTempPath);
+
+        $rightTempPath = $pathService->getTempPath(true) . '/' . mt_rand(0, 9999999) . '.png';
+        file_put_contents($rightTempPath, file_get_contents($rightUrl));
+        $rightImage = new Imagick($rightTempPath);
+
+        $canvas = new Imagick();
+        $canvas->newImage(1024*2, 1024, 'white', 'jpg' );
+        $canvas->compositeImage($leftImage, imagick::COMPOSITE_OVER, 0, 0 );
+        $canvas->compositeImage($rightImage, imagick::COMPOSITE_OVER, 1024, 0 );
+        $canvasPath = $pathService->getTempPath(true) . '/' . mt_rand(0, 9999999) . '.jpg';
+        $canvas->writeImage($canvasPath);
+        $canvas->clear();
+
+        $datetimefile = date('Y-m-d-H-i-s');
+        $datetime = date('Y-m-d H:i:s');
+        $filename = 'dalle-generated-' . $datetimefile . '.jpg';
+        $assetTitle = 'Dall-E generated image ' . $datetime;
+
+        $asset = new Asset();
+        $asset->tempFilePath = $canvasPath;
         $asset->filename = $filename;
         $asset->folderId = $folder->id;
         $asset->newFolderId = $folder->id;

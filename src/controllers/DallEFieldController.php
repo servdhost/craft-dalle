@@ -107,4 +107,37 @@ class DallEFieldController extends Controller
         ]);
 
     }
+
+    public function actionUseImagePair()
+    {
+        $this->requireCpRequest();
+        /** @var Request $req */
+        $req = Craft::$app->getRequest();
+
+        $leftUrl = $req->getQueryParam('leftImageUrl');
+        $rightUrl = $req->getQueryParam('rightImageUrl');
+        $fieldId = $req->getQueryParam('fieldId');
+
+        $fields = Craft::$app->getFields();
+        $field = $fields->getFieldById($fieldId);
+
+        $folderId = $field->resolveDynamicPathToFolderId(null);
+
+        $assetsService = Craft::$app->getAssets();
+        $folder = $assetsService->getFolderById($folderId);
+
+        // Convert the url into an asset
+        /** @var DallE $dalle */
+        $dalle = Plugin::$plugin->dalle;
+        $asset = $dalle->saveImagePairAsAsset($leftUrl, $rightUrl, $folder);
+
+        return $this->asJson([
+            'result' => 'success',
+            'assetId' => $asset->id,
+            'title' => $asset->title,
+            'siteId' => '1',
+            'imageUrl' => $asset->getUrl()
+        ]);
+
+    }
 }
