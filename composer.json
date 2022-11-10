@@ -11,7 +11,7 @@
         "openai",
         "dall-e"
     ],
-    "license": "MIT",
+    "license": "proprietary",
     "authors": [
         {
             "name": "Servd",

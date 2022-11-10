@@ -31,6 +31,10 @@ The license fee for this plugin is $39 via the Craft Plugin Store. This is for t
 - Convert square DALL-E images to landscape by generating additional edge content (optionally with a different prompt!)
 - Selected images are stored as regular image Assets in Craft
 
+## Rate Limiting
+
+**The Open AI API is currently in beta and has a Rate Limit of 10 images per 60s in place. It is quite easy to hit this limit using this plugin. If you do hit the limit you will not be charged for failed image generations and you'll need to a simply wait a little while for it to reset.**
+
 ## Configuration
 
 ### Plugin Settings
