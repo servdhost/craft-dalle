@@ -97,11 +97,13 @@
     padding-left:5px;
     padding-right:5px;
     margin-bottom: 10px;
+    position:relative;
 }
 
 @media (min-width: 520px) {
     .modal-details-lhs {
         width:33%;
+        min-height:512px;
     }
 }
 
@@ -116,6 +118,32 @@
     overflow: hidden;
     border-radius: 5px;
     border: 1px solid rgba(96,125,159,.25);
+}
+
+.modal-details-lhs-zoom{
+    position:absolute;
+    left: 100%;
+    width:512px;
+    height:512px;
+    overflow:hidden;
+    box-shadow: 0 10px 10px -5px rgba(0,0,0,0.5);
+    display:none;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+.modal-details-lhs-zoom-inner{
+    width:200%;
+    height:200%;
+    left:0%;
+    top:0%;
+    position:absolute;
+}
+
+.modal-details-lhs-zoom-inner img{
+    width:100%;
+    height:100%;
+    display:block;
 }
 
 .modal-details-lhs button{

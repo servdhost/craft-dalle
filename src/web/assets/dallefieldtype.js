@@ -29,6 +29,11 @@ $editModalContent.append($editModalResultsWrapper);
 $editModalDetailsWrapper = $(`
     <div class="modal-details-wrapper">
         <div class="modal-details-lhs">
+            <div class="modal-details-lhs-zoom">
+                <div class="modal-details-lhs-zoom-inner">
+                    <img src="">
+                </div>
+            </div>
             <div class="modal-details-lhs-img">
                 <img src="">
             </div>
@@ -44,6 +49,32 @@ $editModalDetailsWrapper = $(`
 `);
 
 let $editModalDetailsRhs = $editModalDetailsWrapper.find('.modal-details-rhs');
+
+let $editModalDetailsLhsImg = $editModalDetailsWrapper.find('.modal-details-lhs-img').first();
+let $editModalDetailsLhsImgZoom = $editModalDetailsWrapper.find('.modal-details-lhs-zoom').first();
+let $editModalDetailsLhsImgZoomInner = $editModalDetailsLhsImgZoom.find('.modal-details-lhs-zoom-inner').first();
+
+$editModalDetailsLhsImg.hover(function(e){
+    $editModalDetailsLhsImgZoom.show();
+}, function(e){
+    $editModalDetailsLhsImgZoom.hide();
+});
+
+$editModalDetailsLhsImg.mousemove(function(e){
+    let target = $(e.currentTarget);
+    let mouseX = e.originalEvent.x;
+    let mouseY = e.originalEvent.y;
+
+    let offsetX = (mouseX - target.offset().left) / target.width();
+    let offsetY = (mouseY - target.offset().top) / target.height();
+    
+    let zoomX = (-100) * offsetX;
+    let zoomY = (-100) * offsetY;
+
+    $editModalDetailsLhsImgZoomInner.css('left', zoomX + '%')
+    $editModalDetailsLhsImgZoomInner.css('top', zoomY + '%')
+
+})
 
 $editModalDetailsWrapper.find('.modal-details-back').click(function(e){
     cancelInflight();
@@ -523,7 +554,9 @@ function handleFetchErrors(response) {
 }
 
 function displayFetchErrors(error) {
-    if (error.text) { //This is an HTTP reponse
+    if (error.name && error.name == 'AbortError') { 
+        Craft.cp.displayError('Request cancelled');
+    } else if (error.text) { //This is an HTTP reponse
         error.text().then(text => {
             try{
                 let parsed = JSON.parse(text); //Is it JSON?
