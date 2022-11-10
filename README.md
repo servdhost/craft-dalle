@@ -1,6 +1,6 @@
 # Dall-E Fieldtype for Craft CMS 4.x
 
-Created by Servd
+Created by [Servd](https://servd.host)
 
 ## About
 
