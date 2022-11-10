@@ -8,7 +8,7 @@ Stop searching for stock images for your blog posts and simply generate them ins
 
 This Craft CMS Plugin adds a new fieldtype to Craft which acts exactly like a normal Asset selection field, but allows you to generate images using the Open AI DALL-E API instead of uploading an image.
 
-![A screenshot of the dall-e fieldtype craft cms plugin](./images/screenshot.png | width=600)
+<img src="./images/screenshot.png" width="600">
 
 ## Pricing
 
