@@ -284,3 +284,13 @@
     height: 30px;
     width: 30px;
 }
+
+.modal-saving-wrapper{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    font-style: italic;
+    opacity: 0.4;
+}

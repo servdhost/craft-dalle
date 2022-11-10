@@ -2,7 +2,7 @@
 
 let globalAjaxAborter = new AbortController();
 
-let $editModalWrapper = $('<div class="modal" style="overflow:auto;height:100%;"><div id="modal" class="body"><header class="header"><h2>Dall-E Generator</h2></header><div class="dalle-modal-content"></div></div></div>');
+let $editModalWrapper = $('<div class="modal" style="overflow:auto;height:100%;"><div class="modal-saving-wrapper"><div>Saving your creation...</div></div><div id="modal" class="body"><header class="header"><h2>Dall-E Generator</h2></header><div class="dalle-modal-content"></div></div></div>');
 let $editModalContent = $editModalWrapper.find('.dalle-modal-content');
 $editModalContent.append($(
     `<div class="modal-input-wrapper">
@@ -11,7 +11,7 @@ $editModalContent.append($(
                 <input type="text" class="dalle-prompt text fullwidth" autocomplete="off" placeholder="Prompt..." dir="ltr">
             </div>
         <div>
-        <button type="button" class="dalle-generate-button btn"><div class="label">Generate</div></button>
+        <button type="button" class="dalle-generate-button btn"><div class="label">Generate New</div></button>
     </div>`)
 );
 
@@ -25,6 +25,9 @@ let $editModalResultsWrapper = $(`
     </div>
 `);
 $editModalContent.append($editModalResultsWrapper);
+
+let $editModalSavingWrapper = $editModalWrapper.find('.modal-saving-wrapper').first();
+$editModalSavingWrapper.hide();
 
 $editModalDetailsWrapper = $(`
     <div class="modal-details-wrapper">
@@ -54,27 +57,29 @@ let $editModalDetailsLhsImg = $editModalDetailsWrapper.find('.modal-details-lhs-
 let $editModalDetailsLhsImgZoom = $editModalDetailsWrapper.find('.modal-details-lhs-zoom').first();
 let $editModalDetailsLhsImgZoomInner = $editModalDetailsLhsImgZoom.find('.modal-details-lhs-zoom-inner').first();
 
-$editModalDetailsLhsImg.hover(function(e){
-    $editModalDetailsLhsImgZoom.show();
-}, function(e){
-    $editModalDetailsLhsImgZoom.hide();
-});
+if($(window).width() >= 520) {
+    $editModalDetailsLhsImg.hover(function(e){
+        $editModalDetailsLhsImgZoom.show();
+    }, function(e){
+        $editModalDetailsLhsImgZoom.hide();
+    });
 
-$editModalDetailsLhsImg.mousemove(function(e){
-    let target = $(e.currentTarget);
-    let mouseX = e.originalEvent.x;
-    let mouseY = e.originalEvent.y;
+    $editModalDetailsLhsImg.mousemove(function(e){
+        let target = $(e.currentTarget);
+        let mouseX = e.originalEvent.x;
+        let mouseY = e.originalEvent.y;
 
-    let offsetX = (mouseX - target.offset().left) / target.width();
-    let offsetY = (mouseY - target.offset().top) / target.height();
-    
-    let zoomX = (-100) * offsetX;
-    let zoomY = (-100) * offsetY;
+        let offsetX = (mouseX - target.offset().left) / target.width();
+        let offsetY = (mouseY - target.offset().top) / target.height();
+        
+        let zoomX = (-100) * offsetX;
+        let zoomY = (-100) * offsetY;
 
-    $editModalDetailsLhsImgZoomInner.css('left', zoomX + '%')
-    $editModalDetailsLhsImgZoomInner.css('top', zoomY + '%')
+        $editModalDetailsLhsImgZoomInner.css('left', zoomX + '%')
+        $editModalDetailsLhsImgZoomInner.css('top', zoomY + '%')
 
-})
+    })
+}
 
 $editModalDetailsWrapper.find('.modal-details-back').click(function(e){
     cancelInflight();
@@ -103,8 +108,10 @@ let $editModalPromptInput = $editModalContent.find('.dalle-prompt');
 let $editModalPromptButton = $editModalContent.find('.dalle-generate-button');
 
 $editModalPromptButton.click(function(e){
-    cancelInflight();
-    performNewGeneration($editModalPromptInput.val());
+    clearModal();
+    setTimeout(function(){
+        performNewGeneration($editModalPromptInput.val());
+    }, 100)
 })
 
 let editModal = new Garnish.Modal($editModalWrapper, {
@@ -148,6 +155,7 @@ function hideModal(){
 }
 
 function resetModal() {
+    $editModalSavingWrapper.hide();
     cancelInflight();
     $editModalPromptInput.val('');
     clearModal(true);
@@ -172,6 +180,12 @@ function setResultsToPlaceholder() {
             <p>A scene from a scary movie?</p>
         </div>
     `));
+}
+
+function showSaving() {
+    $editModalDetailsWrapper.hide();
+    $editModalResultsWrapper.hide();
+    $editModalSavingWrapper.show();
 }
 
 function clearResults() {
@@ -214,6 +228,7 @@ function clearDetailsRHS() {
 }
 
 function selectImage(imageUrl) {
+    showSaving();
     let fieldId = activeGenerator.getAttribute('data-fieldid');
     let useData = {
         imageUrl: $editModalDetailsWrapper.attr('data-url'),
@@ -274,11 +289,14 @@ function selectImage(imageUrl) {
         resetModal();
     }).catch(error => {
         displayFetchErrors(error);
+        $editModalSavingWrapper.hide();
+        $editModalDetailsWrapper.show();
         //TODO undo any loading state set when saving the image
     });
 }
 
 function selectImagePair(leftImageUrl, rightImageUrl) {
+    showSaving();
     let fieldId = activeGenerator.getAttribute('data-fieldid');
     let useData = {
         leftImageUrl,
@@ -341,6 +359,8 @@ function selectImagePair(leftImageUrl, rightImageUrl) {
         resetModal();
     }).catch(error => {
         displayFetchErrors(error);
+        $editModalSavingWrapper.hide();
+        $editModalDetailsWrapper.show();
         //TODO undo any loading state set when saving the image
     });
 }
