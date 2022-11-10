@@ -71,3 +71,7 @@ Once you've found an image that you're happy with you can click the 'Use this' b
 If you require a landscape image, simply click the 'Extend horizontally' button. This will generate options for the left and right sides of your extended image. You can select any combination of the left and right options to form your newly widened image. Once both left and right sides are selected, click the 'Use selected pair' button to save your image and convert it into a Craft Asset.
 
 *Pro tip: You can change the prompt text in the Prompt field before clicking the 'Extend horizontally' button in order to change the content generated in the newly generated sections - the original image in the centre will remain as-is*
+
+## Updating Existing Assets Fields
+
+We've tested converting a vanilla Assets field to an Assets with DALL-E field and haven't encountered any problems - this includes running through a staging and production deployment using project config. However, we recommend performing a full database backup before upgrading your production environment if you are changing a field which is already widely in use.
