@@ -235,7 +235,7 @@ function selectImage(imageUrl) {
         fieldId,
     }
 
-    let useUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/use-image&' + new URLSearchParams(useData);
+    let useUrl = createActionUrl('craft-dalle/dall-e-field/use-image', useData);
     fetch(useUrl, {
         method: 'GET',
         mode: 'same-origin',
@@ -304,7 +304,7 @@ function selectImagePair(leftImageUrl, rightImageUrl) {
         fieldId,
     }
 
-    let useUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/use-image-pair&' + new URLSearchParams(useData);
+    let useUrl = createActionUrl('craft-dalle/dall-e-field/use-image-pair', useData);
     fetch(useUrl, {
         method: 'GET',
         mode: 'same-origin',
@@ -374,8 +374,7 @@ function performNewGeneration(prompt) {
         prompt,
     }
 
-    let generateUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/generate-images&' + new URLSearchParams(data);
-
+    let generateUrl = createActionUrl('craft-dalle/dall-e-field/generate-images', data);
     fetch(generateUrl, {
         method: 'GET',
         mode: 'same-origin',
@@ -427,7 +426,8 @@ function generateVariants(imageUrl) {
     let varyData = {
         imageUrl,
     }
-    let varyUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/generate-variants&' + new URLSearchParams(varyData);
+    
+    let varyUrl = createActionUrl('craft-dalle/dall-e-field/generate-variants', varyData);
     fetch(varyUrl, {
         method: 'GET',
         mode: 'same-origin',
@@ -481,7 +481,7 @@ function generateExtensions(imageUrl) {
         fieldId: activeGenerator.getAttribute('data-fieldid'),
     }
 
-    let extendUrl = Craft.actionUrl + 'craft-dalle/dall-e-field/extend-horizontally&' + new URLSearchParams(extendData);
+    let extendUrl = createActionUrl('craft-dalle/dall-e-field/extend-horizontally', extendData);
     fetch(extendUrl, {
         method: 'GET',
         mode: 'same-origin',
@@ -592,4 +592,15 @@ function displayFetchErrors(error) {
     } else {
         Craft.cp.displayError('An unknown error occurred.'); //Some other error
     }
+}
+
+function createActionUrl(path, queryData) {
+    let baseUrl = Craft.actionUrl.replace(/\/+$/, '');
+    let fullUrl = baseUrl + '/' + path;
+    if (fullUrl.indexOf('?') >= 0) {
+        fullUrl += '&'
+    } else {
+        fullUrl += '?'
+    }
+    return fullUrl + new URLSearchParams(queryData);
 }
