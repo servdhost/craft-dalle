@@ -17,9 +17,9 @@ The license fee for this plugin is $39 via the Craft Plugin Store. This is for t
 ## Getting Started
 
 1. Install the plugin in your Craft CMS 4+ project via the command line or plugin store
-2. Create an Open AI API account here
-3. Add billing details to your Open AI API account
-4. Copy your Open AI API key
+2. Create an Open AI API account [here](https://openai.com/api/)
+3. [Add billing details](https://beta.openai.com/account/billing/overview) to your Open AI API account
+4. Copy your [Open AI API key](https://beta.openai.com/account/api-keys)
 5. Add your API key to this plugin's settings
 6. Add an 'Assets with DALL-E' field to your Craft project
 
