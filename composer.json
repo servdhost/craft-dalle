@@ -1,7 +1,7 @@
 {
     "name": "servd/craft-dalle",
     "description": "A field type to integrate with the Dall-E Image Generation API",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "type": "craft-plugin",
     "keywords": [
         "cms",

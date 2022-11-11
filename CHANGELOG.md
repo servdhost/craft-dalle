@@ -1,5 +1,11 @@
 # Release Notes for Dall-E Fieldtype for Craft CMS
 
+## 1.0.2 - 2022-11-11
+
+### Updated
+
+- Wrapped all of the CP javascript in a function to prevent leaky scopes
+
 ## 1.0.1 - 2022-11-10
 
 ### Fixed
