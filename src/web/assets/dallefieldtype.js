@@ -42,6 +42,7 @@
                 <button class="submit btn modal-details-use">Use this</button>
                 <button class="btn modal-details-variants">Generate variants</button>
                 <button class="btn modal-details-extend">Extend horizontally</button>
+                <button class="btn modal-details-repaint">Spot repaint</button>
                 <button class="btn modal-details-back">Back</button>
             </div>
             <div class="modal-details-rhs">
@@ -98,6 +99,11 @@
     $editModalDetailsWrapper.find('.modal-details-extend').click(function(e){
         cancelInflight();
         generateExtensions($editModalDetailsWrapper.attr('data-url'));
+    });
+
+    $editModalDetailsWrapper.find('.modal-details-repaint').click(function(e){
+        cancelInflight();
+        gotoRepaint($editModalDetailsWrapper.attr('data-url'));
     });
 
     $editModalDetailsWrapper.hide();
@@ -563,6 +569,120 @@
             cancelInflight();
             selectImagePair($wrapper.data('selected-left'), $wrapper.data('selected-right'));
         })
+    }
+
+    function gotoRepaint(imageUrl) {
+        clearDetailsRHS();
+        //Create DON for image repainting
+        $repaintDom = $(`
+            <div class="dalle-repaint">
+                <p>Click and drag to select the area to repaint</p>
+                <div class="dalle-repaint-canvas">
+                    <img src="">
+                    <canvas></canvas>
+                </div>
+                <div class="dalle-repaint-buttons">
+                    <button class="btn dalle-repaint-clear-button">Reset</button>    
+                    <button class="btn dalle-repaint-button">Repaint Selected</button>
+                </div>
+            </div>
+        `);
+
+        $repaintCanvas = $($repaintDom).find('.dalle-repaint-canvas');
+
+        $repaintDom.find('img').prop('src', imageUrl);
+        let canvas = $repaintDom.find('canvas')[0];
+        var ctx = canvas.getContext("2d");
+        
+        let $repaintButton = $repaintDom.find('.dalle-repaint-button');
+        let $clearButton = $repaintDom.find('.dalle-repaint-clear-button');
+
+        $editModalDetailsRhs.append($repaintDom);
+
+        ctx.canvas.width = $repaintDom.width();
+        ctx.canvas.height = $repaintDom.width();
+        ctx.strokeStyle = 'red'
+        ctx.lineCap = 'round';
+        ctx.round = "round";
+        ctx.lineWidth = 30;
+        let drawing = false;
+
+        let lastX, lastY = 0;
+
+        $repaintCanvas.mousedown(function(e){
+            drawing = true;
+            ctx.beginPath();
+        });
+        $repaintCanvas.mouseup(function(e){
+            drawing = false;
+            lastX = 0,
+            lastY = 0;
+        });
+
+        $repaintCanvas.mousemove(function(e){
+            if (drawing) {
+                let xPos = e.originalEvent.x - $repaintCanvas.offset().left;
+                let yPos = (e.originalEvent.y - $repaintCanvas.offset().top) + $(document).scrollTop();
+
+                console.log(e.originalEvent);
+                console.log($repaintCanvas.offset())
+
+                if (lastX > 0 && lastY > 0) {
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(xPos, yPos);
+                    ctx.closePath();
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(xPos, yPos, 5, 0, 2 * Math.PI, false);
+                    ctx.closePath();
+                }
+                lastX = xPos,
+                lastY = yPos;
+            }
+        });
+
+        $repaintButton.click(function(e){
+            let dataUrl = canvas.toDataURL("image/png");
+            generateRepaint(imageUrl, dataUrl);
+        });
+
+        $clearButton.click(function(e){
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        })
+
+    }
+
+    function generateRepaint(imageUrl, maskData) {
+        detailsRHSLoading();
+
+        let extendData = {
+            imageUrl,
+            prompt: $editModalPromptInput.val(),
+            fieldId: activeGenerator.getAttribute('data-fieldid'),
+            maskData: maskData,
+        }
+
+        extendData[Craft.csrfTokenName] = Craft.csrfTokenValue;
+
+        let extendUrl = createActionUrl('craft-dalle/dall-e-field/repaint', []);
+        fetch(extendUrl, {
+            method: 'POST',
+            mode: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(extendData),
+            redirect: 'follow',    
+            signal: globalAjaxAborter.signal
+        }).then(handleFetchErrors)
+        .then((response) => response.json()).then((data) => {
+            populateVaryResults(data.urls);
+        }).catch(error => {
+            displayFetchErrors(error);
+            setTimeout(function(){ //Gives the XHR request a chance to cleanly close before the abort is fired
+                clearDetailsRHS();
+            }, 100);
+        });
     }
 
     function handleFetchErrors(response) {

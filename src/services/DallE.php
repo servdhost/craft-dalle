@@ -18,6 +18,13 @@ class DallE extends Component
     public function generateImages($prompt, $fieldId = null, $count = 1)
     {
 
+        if (getenv('DALLE_DEBUG') ?? false) {
+            return [
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+            ];
+        }
+
         $settings = Plugin::$plugin->getSettings();
 
         $fullPrompt = $prompt;
@@ -54,6 +61,13 @@ class DallE extends Component
     public function generateVariants($sampleUrl, $count = 1)
     {
 
+        if (getenv('DALLE_DEBUG') ?? false) {
+            return [
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+            ];
+        }
+
         $settings = Plugin::$plugin->getSettings();
 
         // Download the asset
@@ -88,6 +102,19 @@ class DallE extends Component
 
     public function extendHorizontally($sampleUrl, $prompt, $fieldId = null, $count = 1)
     {
+
+        if (getenv('DALLE_DEBUG') ?? false) {
+            return [
+                'left' => [
+                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+                ],
+                'right' => [
+                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+                ],
+            ];
+        }
 
         $settings = Plugin::$plugin->getSettings();
 
@@ -169,6 +196,68 @@ class DallE extends Component
                 return $e->url;
             }, $rightResult->data),
         ];
+    }
+
+    public function repaintSection($imageUrl, $maskB64, $prompt, $fieldId, $count)
+    {
+
+        // if (getenv('DALLE_DEBUG') ?? false) {
+        //     return [
+        //         'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+        //         'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+        //     ];
+        // }
+
+        $settings = Plugin::$plugin->getSettings();
+
+        $fullPrompt = $prompt;
+        if (!empty($fieldId)) {
+            // Find the field and grab the pretext and posttext from it
+            /** @var Fields $fields */
+            $fields = Craft::$app->getFields();
+            $field = $fields->getFieldById($fieldId);
+            $fullPrompt = $field->preText . ' ' . $prompt . ' ' . $field->postText;
+        }
+
+        // Download the image
+        /** @var ServicesPath $pathService */
+        $pathService = Craft::$app->getPath();
+        $tempPath = $pathService->getTempPath(true) . '/' . mt_rand(0, 9999999) . '.png';
+        file_put_contents($tempPath, file_get_contents($imageUrl));
+        
+
+        // Save the mask
+        $maskBlob = base64_decode($maskB64);
+        $mask = new Imagick();
+        $mask->readImageBlob($maskBlob);
+        $mask->negateImage(false, Imagick::CHANNEL_ALPHA);
+        $mask->scaleImage(1024, 1024);
+        $maskPath = $pathService->getTempPath(true) . '/' . mt_rand(0, 9999999) . '.png';
+        $mask->writeImage('png32:' . $maskPath);
+
+        $guzzle = Craft::createGuzzleClient();
+        $r = $guzzle->post('https://api.openai.com/v1/images/edits', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $settings->getApiKey()
+            ],
+            'multipart' => [
+                ["name" => "image", "contents" => fopen($tempPath, 'r')],
+                ["name" => "mask", "contents" => fopen($maskPath, 'r')],
+                ["name" => "prompt", "contents" => $fullPrompt],
+                ["name" => "n", "contents" => $count],
+                ["name" => "size", "contents" => "1024x1024"],
+                ["name" => "response_format", "contents" => 'url'],
+            ]
+        ]);
+
+        $result = json_decode($r->getBody());
+        $urls = [];
+        foreach ($result->data as $item) {
+            $urls[] = $item->url;
+        }
+
+        return $urls;
+
     }
 
     public function saveImageAsAsset($url, $folder)

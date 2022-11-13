@@ -161,6 +161,46 @@ class DallEFieldController extends Controller
         ]);
     }
 
+    public function actionRepaint()
+    {
+        $this->requireCpRequest();
+        $settings = Plugin::$plugin->getSettings();
+        if (empty($settings->getApiKey())) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => "No Open AI API key has been set in the plugin settings.",
+            ])->setStatusCode(400);
+        }
+
+        /** @var Request $req */
+        $req = Craft::$app->getRequest();
+        //data:image/png;base64,
+
+        $baseImageUrl = $req->getBodyParam('imageUrl');
+        $fieldId = $req->getBodyParam('fieldId');
+        $maskData = $req->getBodyParam('maskData');
+        $maskData = str_ireplace('data:image/png;base64,', '', $maskData);
+        $prompt = $req->getBodyParam('prompt');
+        $count = intval($settings->count);
+
+        /** @var DallE $dalle */
+        $dalle = Plugin::$plugin->dalle;
+        try{
+            $urls = $dalle->repaintSection($baseImageUrl, $maskData, $prompt, $fieldId, $count);
+        } catch(\Exception $e) {
+            return $this->asJson([
+                'result' => 'error',
+                'message' => $e->getMessage(),
+            ])->setStatusCode(500);
+        }
+
+        return $this->asJson([
+            'result' => 'success',
+            'urls' => $urls,
+        ]);
+
+    }   
+
     public function actionUseImage()
     {
         $this->requireCpRequest();

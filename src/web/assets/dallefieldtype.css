@@ -294,3 +294,37 @@
     font-style: italic;
     opacity: 0.4;
 }
+
+.dalle-repaint p{
+    color: rgb(89, 102, 115);
+    font-weight: 700;
+}
+
+.dalle-repaint-canvas{
+    position:relative;
+    padding-bottom: 100%;
+    margin-bottom: 10px;
+}
+
+.dalle-repaint-canvas img, .dalle-repaint-canvas canvas{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    width:100%;
+}
+
+.dalle-repaint-canvas canvas{
+    opacity: 0.4;
+}
+
+.dalle-repaint-buttons {
+    display:flex;
+    justify-content: center;
+}
+
+.dalle-repaint-buttons button{
+    margin-left:5px;
+    margin-right:5px;
+}
