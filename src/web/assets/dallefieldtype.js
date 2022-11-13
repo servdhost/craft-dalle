@@ -1,6 +1,8 @@
 (function(){
     let globalAjaxAborter = new AbortController();
 
+    let allImageUrls = [];
+
     let $editModalWrapper = $('<div class="modal" style="overflow:auto;height:100%;"><div class="modal-saving-wrapper"><div>Saving your creation...</div></div><div id="modal" class="body"><header class="header"><h2>Dall-E Generator</h2></header><div class="dalle-modal-content"></div></div></div>');
     let $editModalContent = $editModalWrapper.find('.dalle-modal-content');
     $editModalContent.append($(
@@ -83,7 +85,8 @@
 
     $editModalDetailsWrapper.find('.modal-details-back').click(function(e){
         cancelInflight();
-        closeDetails();
+        populateResults();
+
     });
 
     $editModalDetailsWrapper.find('.modal-details-use').click(function(e){
@@ -390,7 +393,8 @@
             signal: globalAjaxAborter.signal  
         }).then(handleFetchErrors)
         .then((response) => response.json()).then((data) => {
-            populateResults(data.urls);
+            allImageUrls = data.urls.concat(allImageUrls);
+            populateResults();
         }).catch(error => {
             displayFetchErrors(error);
             setTimeout(function(){ //Gives the XHR request a chance to cleanly close before the abort is fired
@@ -399,11 +403,11 @@
         });
     }
 
-    function populateResults(urls) {
+    function populateResults() {
 
         clearModal();
 
-        for (imageUrl of urls) {
+        for (imageUrl of allImageUrls) {
             let $item = $(`
             <div class="dalle-preview-item" data-url="${imageUrl}">
                 <div class="dalle-preview-item-inner">
@@ -443,6 +447,7 @@
             signal: globalAjaxAborter.signal
         }).then(handleFetchErrors)
         .then((response) => response.json()).then((data) => {
+            allImageUrls = data.urls.concat(allImageUrls);
             populateVaryResults(data.urls);
         }).catch(error => {
             displayFetchErrors(error);
@@ -676,6 +681,7 @@
             signal: globalAjaxAborter.signal
         }).then(handleFetchErrors)
         .then((response) => response.json()).then((data) => {
+            allImageUrls = data.urls.concat(allImageUrls);
             populateVaryResults(data.urls);
         }).catch(error => {
             displayFetchErrors(error);

@@ -201,12 +201,12 @@ class DallE extends Component
     public function repaintSection($imageUrl, $maskB64, $prompt, $fieldId, $count)
     {
 
-        // if (getenv('DALLE_DEBUG') ?? false) {
-        //     return [
-        //         'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
-        //         'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
-        //     ];
-        // }
+        if (getenv('DALLE_DEBUG') ?? false) {
+            return [
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/IMDb_Logo_Square.svg/1024px-IMDb_Logo_Square.svg.png',
+            ];
+        }
 
         $settings = Plugin::$plugin->getSettings();
 
