@@ -1,5 +1,12 @@
 # Release Notes for Dall-E Fieldtype for Craft CMS
 
+## WIP
+
+### Added
+
+- The ability to 'Spot Repaint' by clicking and dragging to draw out an area of an image to repaint. Optionally using a different prompt.
+- Save all work in progress URLs so that you can go back to any generated images that you might have skipped over earlier.
+
 ## 1.0.2 - 2022-11-11
 
 ### Updated

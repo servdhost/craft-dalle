@@ -25,11 +25,13 @@ The license fee for this plugin is $39 via the Craft Plugin Store. This is for t
 
 ## Features
 
-- Generate DALL-E images with custom prompts directly Craft's Control Panel
+- Generate DALL-E images with custom prompts directly within Craft's Control Panel
 - Set common prompt prefixes and suffixes to maintain a consistent art style for specific Asset fields
 - Generate 'variations' of an image to provide several similar options
 - Convert square DALL-E images to landscape by generating additional edge content (optionally with a different prompt!)
+- Repaint specific areas of an image by colouring in what you'd like to change
 - Selected images are stored as regular image Assets in Craft
+
 
 ## Rate Limiting
 
@@ -64,13 +66,15 @@ If you see an image that you like, the next step is to 'Select' it by hovering o
 
 Mouse over the selected image on the left to zoom in and check to see what it looks like up-close. 
 
-If you spot any small issues, but you like the image in general, use the 'Generate variants' button to create more images similar to the currently select one. If you prefer a variant, simply 'Select' it.
+If you like the image in general, but want a few different versions to choose from, use the 'Generate variants' button to create more images similar to the currently select one. If you prefer a new variant, simply 'Select' it.
+
+If an image has a small defect, or you want to use some of an image as-is but change a portion of it to something else, use the 'Spot repaint' button. This allows you to draw out the area that you'd like to regenerate whilst keeping everything else in the image exactly the same.
 
 Once you've found an image that you're happy with you can click the 'Use this' button on the left hand side to save your image and convert it into a Craft Asset. All DALL-E generated images are square, so this image will be saved as a square.
 
 If you require a landscape image, simply click the 'Extend horizontally' button. This will generate options for the left and right sides of your extended image. You can select any combination of the left and right options to form your newly widened image. Once both left and right sides are selected, click the 'Use selected pair' button to save your image and convert it into a Craft Asset.
 
-*Pro tip: You can change the prompt text in the Prompt field before clicking the 'Extend horizontally' button in order to change the content generated in the newly generated sections - the original image in the centre will remain as-is*
+*Pro tip: You can change the prompt text in the Prompt field before using the 'Extend horizontally' or 'Spot repaint' functions in order to change the content added to the newly generated sections*
 
 ## Updating Existing Assets Fields
 
