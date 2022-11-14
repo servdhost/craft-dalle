@@ -43,9 +43,9 @@
                 </div>
                 <button class="submit btn modal-details-use">Use this</button>
                 <button class="btn modal-details-variants">Generate variants</button>
-                <button class="btn modal-details-extend">Extend horizontally</button>
                 <button class="btn modal-details-repaint">Spot repaint</button>
-                <button class="btn modal-details-back">Back</button>
+                <button class="btn modal-details-extend">Extend horizontally</button>
+                <button class="btn modal-details-back">Back to all images</button>
             </div>
             <div class="modal-details-rhs">
                 
