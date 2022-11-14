@@ -1,6 +1,6 @@
 # Release Notes for Dall-E Fieldtype for Craft CMS
 
-## WIP
+## 1.0.3 - 2022-11-14
 
 ### Added
 
