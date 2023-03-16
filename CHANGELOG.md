@@ -1,5 +1,11 @@
 # Release Notes for Dall-E Fieldtype for Craft CMS
 
+## 1.0.4 - 2023-03-16
+
+### Fixed
+
+- Action URLs used by the plugin were broken if both omitScriptNameInUrls was false and multisite was being used
+
 ## 1.0.3 - 2022-11-14
 
 ### Added

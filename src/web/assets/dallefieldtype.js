@@ -720,13 +720,21 @@
     }
 
     function createActionUrl(path, queryData) {
-        let baseUrl = Craft.actionUrl.replace(/\/+$/, '');
-        let fullUrl = baseUrl + '/' + path;
-        if (fullUrl.indexOf('?') >= 0) {
-            fullUrl += '&'
+        let baseUrl = Craft.actionUrl;
+        let parsedUrl = new URL(baseUrl);
+        if(parsedUrl.searchParams.get('p') && parsedUrl.searchParams.get('p').length > 0){
+            let existingPValue = parsedUrl.searchParams.get('p');
+            let newPValue = existingPValue.replace(/\/+$/, '') + '/' + path;
+            parsedUrl.searchParams.set('p', newPValue)
         } else {
-            fullUrl += '?'
+            parsedUrl.pathname = parsedUrl.pathname.replace(/\/+$/, '') + '/' + path;
         }
-        return fullUrl + new URLSearchParams(queryData);
+
+        let updatedParams = new URLSearchParams(queryData);
+        for (let [key, val] of updatedParams.entries()) {
+            parsedUrl.searchParams.append(key, val);
+        }
+        
+        return parsedUrl.toString();
     }
 })();
